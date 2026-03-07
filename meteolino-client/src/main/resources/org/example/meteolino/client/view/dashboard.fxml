@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="768.0" prefWidth="1024.0" stylesheets="@../../../../../css/style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.meteolino.client.ui.controller.DashboardController">
+    <padding>
+        <Insets bottom="30.0" left="40.0" right="40.0" top="30.0" />
+    </padding>
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20.0" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets bottom="25.0" />
+            </padding>
+            <Label styleClass="title-main" text="Meteolino" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Label styleClass="text-muted" text="Ultimo aggiornamento: " />
+            <Label fx:id="lastUpdateLabel" styleClass="text-bold" text="--:--" />
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="25.0" BorderPane.alignment="CENTER">
+            <HBox spacing="20.0">
+                <VBox styleClass="card" HBox.hgrow="ALWAYS">
+                    <Label styleClass="text-muted" text="Livello Attuale" />
+                    <Label fx:id="currentLevelLabel" styleClass="kpi-value" text="-- m" />
+                    <Label fx:id="trendLabel" styleClass="text-muted" text="Tendenza: --" />
+                </VBox>
+                <VBox styleClass="card" HBox.hgrow="ALWAYS">
+                    <Label styleClass="text-muted" text="Soglia Allerta (Regione)" />
+                    <Label styleClass="kpi-alert" text="1.50 m" />
+                    <Label styleClass="text-muted" text="Stato: Normale" />
+                </VBox>
+                <VBox styleClass="card" HBox.hgrow="ALWAYS">
+                    <Label styleClass="text-muted" text="Precipitazioni 24h" />
+                    <Label styleClass="kpi-value" text="0.0 mm" />
+                    <Label styleClass="text-muted" text="Sensore pioggia non collegato" />
+                </VBox>
+            </HBox>
+
+            <HBox spacing="20.0" VBox.vgrow="ALWAYS">
+                <VBox styleClass="card" HBox.hgrow="ALWAYS">
+                    <HBox alignment="CENTER_LEFT" spacing="15.0">
+                        <padding>
+                            <Insets bottom="15.0" />
+                        </padding>
+                        <Label styleClass="title-section" text="Andamento Livello Idrometrico" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label styleClass="text-muted" text="Ore:" />
+                        <ComboBox fx:id="hoursComboBox" prefWidth="100.0" styleClass="combo-box-modern" />
+                    </HBox>
+                    <LineChart fx:id="riverLevelChart" legendVisible="false" VBox.vgrow="ALWAYS">
+                        <xAxis>
+                            <CategoryAxis fx:id="timeAxis" label="Orario" side="BOTTOM" />
+                        </xAxis>
+                        <yAxis>
+                            <NumberAxis fx:id="levelAxis" label="Metri (m)" side="LEFT" />
+                        </yAxis>
+                    </LineChart>
+                </VBox>
+
+                <VBox prefWidth="280.0" spacing="15.0" styleClass="card">
+                    <Label styleClass="title-section" text="Avvisi Locali" />
+                    <VBox spacing="10.0" styleClass="alert-box">
+                        <Label styleClass="text-bold" text="Nessuna Allerta" textFill="WHITE" />
+                        <Label text="Condizioni meteo stabili." textFill="WHITE" wrapText="true" />
+                    </VBox>
+                    <Region VBox.vgrow="ALWAYS" />
+                    <Label styleClass="text-muted" text="Altre stazioni:" />
+                    <Label text="• Ferrara (Pontelagoscuro)" />
+                    <Label text="• Bondeno (Panaro)" />
+                </VBox>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>
