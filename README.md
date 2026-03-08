@@ -1,6 +1,6 @@
 ## Ruolo di ogni file
 
-### `meteolino-core`
+### `idrolog-core`
 
 **`model/WeatherSnapshot.java`** — record immutabile che rappresenta una singola rilevazione grezza ricevuta da una delle due API. Contiene timestamp, sorgente (`API_ONE`/`API_TWO`), e i campi grezzi (temperatura, umidità, ecc.). Usato sia dal server per salvare, sia dal client per ricevere.
 
@@ -12,7 +12,7 @@
 
 ---
 
-### `meteolino-server`
+### `idrolog-server`
 
 **`ServerMain.java`** — unico entry point. Inizializza nell'ordine: `DatabaseManager` → `DataCollectorService.start()` → `ApiServer.start()`. Non ha dipendenze da JavaFX.
 
