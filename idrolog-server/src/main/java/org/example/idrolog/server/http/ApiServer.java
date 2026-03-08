@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.javalin.Javalin;
 import io.javalin.json.JavalinJackson;
+import org.example.idrolog.server.db.DatabaseManager;
 import org.example.idrolog.server.db.SnapshotsRepository;
 
 public class ApiServer {
@@ -24,16 +25,29 @@ public class ApiServer {
 
             config.routes.get("/", ctx -> ctx.result("IdroLog server is running"));
             config.routes.get("/api/health", ctx -> ctx.result("OK"));
-            config.routes.get("/api/snapshots", ctx -> {
+            /*config.routes.get("/api/snapshots", ctx -> {
                 int hours = Integer.parseInt(
                         ctx.queryParamAsClass("hours", String.class).getOrDefault("24")
                 );
                 ctx.json(repository.getLastHours(hours));
+            });*/
+            config.routes.get("/api/river_levels", ctx -> {
+                int hours = Integer.parseInt(
+                        ctx.queryParamAsClass("hours", String.class).getOrDefault("24")
+                );
+                ctx.json(repository.getLastHours(hours, DatabaseManager.TABLE_RIVER));
+            });
+            config.routes.get("/api/precipitation", ctx -> {
+                int hours = Integer.parseInt(
+                        ctx.queryParamAsClass("hours", String.class).getOrDefault("24")
+                );
+                ctx.json(repository.getLastHours(hours, DatabaseManager.TABLE_PRECIPITATION));
             });
         }).start(port);
     }
 
     public void stop() {
-        if (app != null) app.stop();
+        if (app != null)
+            app.stop();
     }
 }

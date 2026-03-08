@@ -19,68 +19,62 @@
     <top>
         <HBox alignment="CENTER_LEFT" spacing="20.0" BorderPane.alignment="CENTER">
             <padding>
-                <Insets bottom="25.0" />
+                <Insets bottom="30.0" />
             </padding>
             <Label styleClass="title-main" text="IdroLog" />
-            <Region HBox.hgrow="ALWAYS" />
-            <Label styleClass="text-muted" text="Ultimo aggiornamento: " />
-            <Label fx:id="lastUpdateLabel" styleClass="text-bold" text="--:--" />
         </HBox>
     </top>
 
     <center>
-        <VBox spacing="25.0" BorderPane.alignment="CENTER">
-            <HBox spacing="20.0">
-                <VBox styleClass="card" HBox.hgrow="ALWAYS">
+        <VBox spacing="20.0" BorderPane.alignment="CENTER">
+
+            <HBox spacing="20.0" VBox.vgrow="NEVER">
+
+                <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="2.0">
                     <Label styleClass="text-muted" text="Livello Attuale" />
-                    <Label fx:id="currentLevelLabel" styleClass="kpi-value" text="-- m" />
-                    <Label fx:id="trendLabel" styleClass="text-muted" text="Tendenza: --" />
-                </VBox>
-                <VBox styleClass="card" HBox.hgrow="ALWAYS">
-                    <Label styleClass="text-muted" text="Soglia Allerta (Regione)" />
-                    <Label styleClass="kpi-alert" text="1.50 m" />
-                    <Label styleClass="text-muted" text="Stato: Normale" />
-                </VBox>
-                <VBox styleClass="card" HBox.hgrow="ALWAYS">
-                    <Label styleClass="text-muted" text="Precipitazioni 24h" />
-                    <Label styleClass="kpi-value" text="0.0 mm" />
-                    <Label styleClass="text-muted" text="Sensore pioggia non collegato" />
-                </VBox>
-            </HBox>
-
-            <HBox spacing="20.0" VBox.vgrow="ALWAYS">
-                <VBox styleClass="card" HBox.hgrow="ALWAYS">
-                    <HBox alignment="CENTER_LEFT" spacing="15.0">
-                        <padding>
-                            <Insets bottom="15.0" />
-                        </padding>
-                        <Label styleClass="title-section" text="Andamento Livello Idrometrico" />
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Label styleClass="text-muted" text="Ore:" />
-                        <ComboBox fx:id="hoursComboBox" prefWidth="100.0" styleClass="combo-box-modern" />
+                    <HBox alignment="BASELINE_LEFT" spacing="8.0">
+                        <Label fx:id="currentLevelLabel" styleClass="kpi-value" text="-- m" />
+                        <Label fx:id="lastUpdateLabel" styleClass="text-muted" text="(--:--)" />
                     </HBox>
-                    <LineChart fx:id="riverLevelChart" legendVisible="false" VBox.vgrow="ALWAYS">
-                        <xAxis>
-                            <CategoryAxis fx:id="timeAxis" label="Orario" side="BOTTOM" />
-                        </xAxis>
-                        <yAxis>
-                            <NumberAxis fx:id="levelAxis" label="Metri (m)" side="LEFT" />
-                        </yAxis>
-                    </LineChart>
+                    <HBox spacing="15.0">
+                        <Label fx:id="statusLabel" styleClass="text-bold" text="Stato: Normale" />
+                        <Label fx:id="trendLabel" styleClass="text-muted" text="Tendenza: --" />
+                    </HBox>
                 </VBox>
 
-                <VBox prefWidth="280.0" spacing="15.0" styleClass="card">
-                    <Label styleClass="title-section" text="Avvisi Locali" />
-                    <VBox spacing="10.0" styleClass="alert-box">
-                        <Label styleClass="text-bold" text="Nessuna Allerta" textFill="WHITE" />
-                        <Label text="Condizioni meteo stabili." textFill="WHITE" wrapText="true" />
-                    </VBox>
-                    <Region VBox.vgrow="ALWAYS" />
-                    <Label styleClass="text-muted" text="Altre stazioni:" />
-                    <Label text="• Ferrara (Pontelagoscuro)" />
-                    <Label text="• Bondeno (Panaro)" />
+                <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="2.0">
+                    <Label fx:id="precipitationTitleLabel" styleClass="text-muted" text="Precipitazioni 24h" />
+                    <Label fx:id="precipitationLabel" styleClass="kpi-value" text="0.0 mm" />
+                    <Label fx:id="precipitationStatusLabel" styleClass="text-muted" text="Sensore non collegato" />
                 </VBox>
+
+                <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="5.0">
+                    <Label styleClass="title-section" text="Avvisi" />
+                    <VBox spacing="2.0" styleClass="alert-box" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
+                        <Label styleClass="text-white-bold" text="Nessuna Allerta" />
+                        <Label styleClass="text-white" text="Condizioni stabili." wrapText="true" minHeight="-Infinity" />
+                    </VBox>
+                </VBox>
+
             </HBox>
+
+            <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="10.0">
+                <HBox alignment="CENTER_LEFT" spacing="15.0">
+                    <Label styleClass="title-section" text="Andamento Livello Idrometrico" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Label styleClass="text-muted" text="Visualizza:" />
+                    <ComboBox fx:id="hoursComboBox" prefWidth="120.0" styleClass="combo-box-modern" />
+                </HBox>
+                <LineChart fx:id="riverLevelChart" legendVisible="false" VBox.vgrow="ALWAYS">
+                    <xAxis>
+                        <CategoryAxis fx:id="timeAxis" label="Orario" side="BOTTOM" />
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis fx:id="levelAxis" label="Metri (m)" side="LEFT" />
+                    </yAxis>
+                </LineChart>
+            </VBox>
+
         </VBox>
     </center>
 </BorderPane>

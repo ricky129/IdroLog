@@ -2,6 +2,7 @@ package org.example.idrolog.server.scheduler;
 
 import org.example.idrolog.server.api.ApiOneClient;
 import org.example.idrolog.server.api.ApiTwoClient;
+import org.example.idrolog.server.db.DatabaseManager;
 import org.example.idrolog.server.db.SnapshotsRepository;
 
 import java.util.concurrent.Executors;
@@ -23,21 +24,33 @@ public class DataCollectorService {
     }
 
     public void start() {
-        scheduler.scheduleAtFixedRate(this::collect, 0, 15, TimeUnit.MINUTES);
+        scheduler.scheduleAtFixedRate(this::collectOne, 0, 15, TimeUnit.MINUTES);
+        scheduler.scheduleAtFixedRate(this::collectTwo, 0, 60, TimeUnit.MINUTES);
     }
 
     public void stop() {
         scheduler.shutdown();
     }
 
-    private void collect() {
+    private void collectOne() {
         try {
-            var snapshotOne = apiOneClient.fetch();
-            if (snapshotOne != null) repository.save(snapshotOne);
+            var snapshot = apiOneClient.fetchHydro();
+            if (snapshot != null)
+                repository.save(snapshot, DatabaseManager.TABLE_RIVER);
+        } catch (Exception e) {
+            System.err.println("Errore durante la raccolta: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
-            /*var snapshotTwo = apiTwoClient.fetchD();
-            if (snapshotTwo != null) repository.save(snapshotTwo);*/
-
+    private void collectTwo() {
+        try {
+            var snapshots = apiTwoClient.fetchRain();
+            if (snapshots != null) {
+                for (var snapshot : snapshots) {
+                    repository.save(snapshot, DatabaseManager.TABLE_PRECIPITATION);
+                }
+            }
         } catch (Exception e) {
             System.err.println("Errore durante la raccolta: " + e.getMessage());
             e.printStackTrace();

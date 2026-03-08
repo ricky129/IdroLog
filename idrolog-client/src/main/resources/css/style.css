@@ -1,96 +1,105 @@
 .root {
-    -fx-background-color: #e2e2e2;
-    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    -fx-background-color: #f3f4f6; /* Grigio chiarissimo, quasi bianco */
+    -fx-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 .title-main {
-    -fx-text-fill: #0a2463;
+    -fx-text-fill: #111827;
     -fx-font-size: 36px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 800;
 }
 
 .title-section {
-    -fx-text-fill: #0a2463;
+    -fx-text-fill: #111827;
     -fx-font-size: 18px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 700;
 }
 
 .text-muted {
-    -fx-text-fill: #605f5e;
-    -fx-font-size: 13px;
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
 }
 
 .text-bold {
-    -fx-text-fill: #605f5e;
-    -fx-font-weight: bold;
-}
-
-.kpi-value {
-    -fx-text-fill: #247ba0;
-    -fx-font-size: 32px;
-    -fx-font-weight: bold;
-    -fx-padding: 5 0 5 0;
-}
-
-.kpi-alert {
-    -fx-text-fill: #fb3640;
-    -fx-font-size: 32px;
-    -fx-font-weight: bold;
-    -fx-padding: 5 0 5 0;
+    -fx-text-fill: #374151;
+    -fx-font-weight: 700;
+    -fx-font-size: 14px;
 }
 
 .card {
-    -fx-background-color: white;
-    -fx-background-radius: 12px;
-    -fx-padding: 20px;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.06), 15, 0, 0, 4);
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 16px;
+    -fx-padding: 12px 20px; /* Ridotto il padding verticale da 20px a 12px */
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 30, 0, 0, 8);
+}
+
+.kpi-value {
+    -fx-text-fill: #0ea5e9;
+    -fx-font-size: 32px; /* Ridotto leggermente da 36px */
+    -fx-font-weight: 800;
+    -fx-padding: 0; /* Rimosso il padding extra */
 }
 
 .alert-box {
-    -fx-background-color: #247ba0;
-    -fx-background-radius: 8px;
-    -fx-padding: 15px;
+    -fx-background-color: linear-gradient(to bottom right, #3b82f6, #1d4ed8);
+    -fx-background-radius: 12px;
+    -fx-padding: 12px 15px; /* Compattato il box degli avvisi */
+    -fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.3), 15, 0, 0, 5);
+}
+
+.text-white-bold {
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: 800;
+    -fx-font-size: 16px;
+}
+.text-white {
+    -fx-text-fill: rgba(255, 255, 255, 0.9);
+    -fx-font-size: 14px;
+    -fx-font-weight: 500;
 }
 
 .combo-box-modern {
-    -fx-background-color: #f4f4f4;
-    -fx-background-radius: 6px;
-    -fx-border-color: #e2e2e2;
-    -fx-border-radius: 6px;
+    -fx-background-color: #f9fafb;
+    -fx-background-radius: 10px;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 10px;
+    -fx-padding: 6px 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #374151;
 }
 
+/* --- Restyling del Grafico --- */
 .chart {
-    -fx-padding: 0px;
+    -fx-padding: 10px;
 }
-
 .chart-plot-background {
-    -fx-background-color: #ffffff;
+    -fx-background-color: transparent;
 }
-
-.chart-vertical-grid-lines,
+.chart-vertical-grid-lines {
+    -fx-stroke: transparent; /* Rimuove le linee verticali per un look più pulito */
+}
 .chart-horizontal-grid-lines {
-    -fx-stroke: #e2e2e2;
+    -fx-stroke: #f3f4f6;
+    -fx-stroke-width: 2px;
+    -fx-stroke-dash-array: 5 5; /* Linee orizzontali tratteggiate */
 }
-
 .default-color0.chart-series-line {
-    -fx-stroke: #247ba0;
-    -fx-stroke-width: 4px;
+    -fx-stroke: #0ea5e9;
+    -fx-stroke-width: 5px;
     -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+    -fx-effect: dropshadow(gaussian, rgba(14, 165, 233, 0.4), 15, 0, 0, 8);
 }
-
 .default-color0.chart-line-symbol {
-    -fx-background-color: #0a2463, white;
-    -fx-background-insets: 0, 2.5;
-    -fx-scale-x: 1.2;
-    -fx-scale-y: 1.2;
+    -fx-background-color: #0ea5e9, #ffffff;
+    -fx-background-insets: 0, 3; /* Crea un anello blu con centro bianco */
+    -fx-scale-x: 1.4;
+    -fx-scale-y: 1.4;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);
 }
-
 .axis {
-    -fx-tick-label-fill: #605f5e;
+    -fx-tick-label-fill: #9ca3af;
+    -fx-font-weight: 600;
     -fx-tick-mark-stroke: transparent;
-}
-
-.axis-label {
-    -fx-text-fill: #605f5e;
-    -fx-font-weight: bold;
 }

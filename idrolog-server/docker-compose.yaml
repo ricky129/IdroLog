@@ -1,0 +1,22 @@
+services:
+  idrolog-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: idrolog-server
+    ports:
+      - "7000:7000"
+    volumes:
+      - ./data:/data        # SQLite persiste qui
+      # - ./config:/config:ro         # config con chiavi API (read-only)
+    environment:
+      - DB_PATH=/data/idrolog.db
+      - CONFIG_PATH=/config/server.properties
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+

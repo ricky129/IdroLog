@@ -5,6 +5,5 @@ import java.util.List;
 
 public class LocalProcessor {
     public void processLocally(List<WeatherSnapshot> snapshots) {
-        // Minimal logic or placeholder
     }
 }

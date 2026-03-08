@@ -15,13 +15,18 @@ public class ApiOneClient {
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final String stationId;
 
-    public WeatherSnapshot fetch() throws Exception {
+    public ApiOneClient(String stationId) {
+        this.stationId = stationId;
+    }
+
+    public WeatherSnapshot fetchHydro() throws Exception {
         URI uri = new URI(
                 "https",
                 "allertameteo.regione.emilia-romagna.it",
                 "/o/api/allerta/get-time-series/",
-                "stazione=53429&variabile=254,0,0/1,-,-,-/B13215",
+                "stazione=" + stationId + "&variabile=254,0,0/1,-,-,-/B13215",
                 null
         );
 
@@ -38,14 +43,15 @@ public class ApiOneClient {
 
         List<RiverDataPoint> points = objectMapper.readValue(
                 response.body(),
-                new TypeReference<List<RiverDataPoint>>() {}
+                new TypeReference<>() {
+                }
         );
 
-        if (points == null || points.isEmpty()) return null;
+        if (points == null || points.isEmpty())
+            return null;
 
         RiverDataPoint last = points.getLast();
         return new WeatherSnapshot(
-                "river_level",
                 last.v(),
                 Instant.ofEpochMilli(last.t())
         );
