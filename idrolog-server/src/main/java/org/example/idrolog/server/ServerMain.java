@@ -17,7 +17,7 @@ public class ServerMain {
     public static void main(String[] args) throws SQLException {
         String dbPath = System.getenv().getOrDefault("DB_PATH", "data/idrolog.db");
         Properties props = new Properties();
-        Path configPath = Path.of(System.getProperty("user.home"), ".idrolog", "config.properties");
+        Path configPath = Path.of(System.getProperty("user.dir"), "config.properties");  
         try (InputStream in = Files.newInputStream(configPath)) {
             props.load(in);
         } catch (Exception e) {

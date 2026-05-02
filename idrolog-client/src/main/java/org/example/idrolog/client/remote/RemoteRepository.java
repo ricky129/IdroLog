@@ -8,6 +8,7 @@ import org.example.idrolog.core.model.WeatherSnapshot;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -26,7 +27,14 @@ public class RemoteRepository {
 
     static {
         Properties props = new Properties();
-        Path configPath = Path.of(System.getProperty("user.dir"), "config.properties");
+        Path configPath = null;
+        try {
+            configPath = Path.of(
+                    RemoteRepository.class.getProtectionDomain().getCodeSource().getLocation().toURI()
+            ).getParent().resolve("config.properties");
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
         try (InputStream in = Files.newInputStream(configPath)) {
             props.load(in);
         } catch (Exception e) {
