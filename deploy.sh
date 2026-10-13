@@ -42,18 +42,15 @@
     echo "==> Copia artefatti sul server remoto (${DEPLOY_USER}@${DEPLOY_HOST})..."
     scp "${SCP_OPTS[@]}" "$SCRIPT_DIR/idrolog-server/target/app-shaded.jar" "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_REMOTE_DIR}/idrolog-server/target/app-shaded.jar"
 
+    scp "${SCP_OPTS[@]}" "$SCRIPT_DIR/idrolog-server/docker-compose.yaml" "$SCRIPT_DIR/idrolog-server/Dockerfile" "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_REMOTE_DIR}/idrolog-server/"
+
     if [ -f "$SCRIPT_DIR/$CONFIG_FILE" ]; then
-        scp "${SCP_OPTS[@]}" "$SCRIPT_DIR/$CONFIG_FILE" "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_REMOTE_DIR}/config.properties"
+        scp "${SCP_OPTS[@]}" "$SCRIPT_DIR/$CONFIG_FILE" "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_REMOTE_DIR}/idrolog-server/config.properties"
+    elif [ -f "$SCRIPT_DIR/idrolog-server/$CONFIG_FILE" ]; then
+        scp "${SCP_OPTS[@]}" "$SCRIPT_DIR/idrolog-server/$CONFIG_FILE" "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_REMOTE_DIR}/idrolog-server/config.properties"
     fi
 
     echo "==> Riavvio container Docker..."
-    ssh "${SSH_OPTS[@]}" "${DEPLOY_USER}@${DEPLOY_HOST}" bash -c "'
-        if [ -f \"${DEPLOY_REMOTE_DIR}/docker-compose.yaml\" ]; then
-            cd \"${DEPLOY_REMOTE_DIR}\"
-        else
-            cd \"${DEPLOY_REMOTE_DIR}/idrolog-server\"
-        fi
-        docker compose down && docker compose up -d --build
-    '"
+    ssh "${SSH_OPTS[@]}" "${DEPLOY_USER}@${DEPLOY_HOST}" "cd \"${DEPLOY_REMOTE_DIR}/idrolog-server\" && docker compose down && docker compose up -d --build"
 
     echo "Deploy completato con successo."

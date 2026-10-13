@@ -24,7 +24,14 @@ IdroLog è un'applicazione Java per monitorare il livello dei fiumi e le piogge.
 
 ## ⚙️ Configurazione
 
-Il sistema richiede un file `config.properties` per funzionare. Crea il file nella root del progetto (per il client) o in `~/.idrolog/config.properties` (per il server) con i seguenti parametri:
+Il progetto distingue chiaramente tra configurazione applicativa e configurazione di infrastruttura:
+
+* **`config.properties` (Applicazione / Runtime Java)**: contiene i parametri di dominio (ID della stazione, coordinate, endpoint del server). Viene letto dal codice Java sia dal client che dal server (anche dentro il container Docker).
+* **`.env` (Infrastruttura / Deploy locale)**: contiene esclusivamente i parametri SSH utilizzati dallo script Bash `deploy.sh` (`DEPLOY_USER`, `DEPLOY_HOST`, porta, cartella remota) per automatizzare il deployment. Rimane solo sulla tua macchina locale e non viene incluso nell'applicazione né nel container.
+
+### Configurazione Applicativa (`config.properties`)
+
+Crea il file nella root del progetto o all'interno di `idrolog-server/config.properties` con i seguenti parametri:
 
 ```properties
 # Indirizzi del server IdroLog
@@ -77,31 +84,39 @@ java -jar idrolog-client/target/idrolog-client-1.0-SNAPSHOT.jar
 
 ## 🚢 Deployment (Server)
 
-Il server è predisposto per il deployment automatizzato su ambiente Docker remoto. È disponibile uno script di automazione che esegue il build, il trasferimento dell'artefatto e il riavvio dei container.
+Il server è predisposto per il deployment su ambiente Docker. I file di configurazione Docker ([Dockerfile](idrolog-server/Dockerfile) e [docker-compose.yaml](idrolog-server/docker-compose.yaml)) si trovano all'interno del modulo `idrolog-server/`.
 
-### Script di Deploy (`deploy.sh`)
+### Deployment automatizzato (`deploy.sh`)
 
-Assicurati di aver configurato le chiavi SSH per l'accesso senza password verso il server di destinazione:
+È disponibile lo script `deploy.sh` che esegue automaticamente la compilazione del server, il trasferimento degli artefatti e delle configurazioni via SSH/SCP e il riavvio dei container sul server remoto.
 
-```bash
-#!/bin/bash
-set -e
+1. **Configurazione ambiente:**
+   Copia il file di esempio e configura i parametri di connessione del server remoto:
+   ```bash
+   cp .env.example .env
+   ```
+   Configura i valori (`DEPLOY_USER`, `DEPLOY_HOST`, `DEPLOY_REMOTE_DIR`, ecc.).
 
-# Configurazione parametri remoti
-REMOTE_USER="<USER>"
-REMOTE_HOST="<IP_OR_HOSTNAME>"
-REMOTE_TARGET_DIR="<REMOTE_PROJECT_PATH>"
+2. **Esecuzione del deploy:**
+   ```bash
+   ./deploy.sh
+   ```
 
-# 1. Compilazione del modulo server e dipendenze
-mvn clean package -pl idrolog-server -am
+### Avvio manuale con Docker Compose
 
-# 2. Trasferimento del file JAR al server remoto
-scp idrolog-server/target/app-shaded.jar ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_TARGET_DIR}/idrolog-server/target/app-shaded.jar
+Se desideri eseguire il server con Docker localmente o gestirlo manualmente:
 
-# 3. Riavvio dei container via SSH
-ssh ${REMOTE_USER}@${REMOTE_HOST} "cd ${REMOTE_TARGET_DIR}/idrolog-server && docker compose down && docker compose up -d --build"
+1. Compila il modulo server:
+   ```bash
+   ./mvnw clean package -pl idrolog-server -am
+   ```
 
-echo "Deploy completato."
+2. Assicurati che `config.properties` sia presente in `idrolog-server/` (o montato nel container).
 
-```
+3. Avvia i container:
+   ```bash
+   cd idrolog-server
+   docker compose up -d --build
+   ```
+
 
