@@ -7,7 +7,7 @@ services:
     ports:
       - "7000:7000"
     volumes:
-      - ./data:/data        # SQLite persiste qui
+      - ../data:/data        # SQLite persiste qui nella root
       - ./config.properties:/app/config.properties
     environment:
       - DB_PATH=/data/idrolog.db

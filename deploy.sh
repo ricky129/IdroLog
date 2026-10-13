@@ -82,6 +82,13 @@ scp "${SCP_OPTS[@]}" "$SCRIPT_DIR/idrolog-server/docker-compose.yaml" "$SCRIPT_D
 scp "${SCP_OPTS[@]}" "$CONFIG_PATH" "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_REMOTE_DIR}/idrolog-server/config.properties"
 
 echo "==> Riavvio container Docker..."
-ssh "${SSH_OPTS[@]}" "${DEPLOY_USER}@${DEPLOY_HOST}" "cd \"${DEPLOY_REMOTE_DIR}/idrolog-server\" && docker compose down && docker compose up -d --build"
+ssh "${SSH_OPTS[@]}" "${DEPLOY_USER}@${DEPLOY_HOST}" bash -c "'
+    if [ -f \"${DEPLOY_REMOTE_DIR}/docker-compose.yaml\" ]; then
+        cd \"${DEPLOY_REMOTE_DIR}\" && docker compose down 2>/dev/null || true
+        rm -f \"${DEPLOY_REMOTE_DIR}/docker-compose.yaml\" \"${DEPLOY_REMOTE_DIR}/Dockerfile\" 2>/dev/null || true
+    fi
+    docker rm -f idrolog-server 2>/dev/null || true
+    cd \"${DEPLOY_REMOTE_DIR}/idrolog-server\" && docker compose down && docker compose up -d --build
+'"
 
 echo "Deploy completato con successo."
