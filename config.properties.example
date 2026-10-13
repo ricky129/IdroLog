@@ -1,0 +1,23 @@
+# ==============================================================================
+# IdroLog - Configuration File
+# ==============================================================================
+
+# --- Connessione Server (usato dal Client JavaFX) ---
+# server.tailscale: OBBLIGATORIO (provato per primo dal Client e usato come default da deploy.sh)
+server.tailscale=http://100.x.y.z:7000
+
+# server.local: OPZIONALE (usato come fallback locale se Tailscale non è raggiungibile)
+server.local=http://192.168.1.252:7000
+
+# --- Parametri Stazione di Monitoraggio (usato dal Backend Server) ---
+station.id=XXXXX
+station.latitude=44.4949
+station.longitude=11.3426
+
+# --- Deployment Remoto SSH (usato da deploy.sh) ---
+deploy.user=myserver
+deploy.remote_dir=~/docker/idrolog
+
+# deploy.host=          # Opzionale: se omesso, viene estratto automaticamente da server.tailscale
+# deploy.port=22        # Opzionale: default 22
+# deploy.key=           # Opzionale: percorso della chiave privata SSH (es. ~/.ssh/id_ed25519)

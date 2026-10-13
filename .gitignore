@@ -33,4 +33,3 @@ config.properties
 Thumbs.db
 
 .env
-config.properties

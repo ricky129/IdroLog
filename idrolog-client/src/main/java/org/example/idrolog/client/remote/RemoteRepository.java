@@ -42,9 +42,9 @@ public class RemoteRepository {
         }
         LOCAL_URL = props.getProperty("server.local");
         TAILSCALE_URL = props.getProperty("server.tailscale");
-        if (LOCAL_URL == null || TAILSCALE_URL == null)
-            throw new IllegalStateException("Server URLs missing in config.properties");
-        }
+        if (TAILSCALE_URL == null || TAILSCALE_URL.isBlank())
+            throw new IllegalStateException("server.tailscale missing in config.properties");
+    }
 
     private final HttpClient client = HttpClient.newHttpClient();
     private final ObjectMapper mapper = new ObjectMapper()
@@ -54,21 +54,43 @@ public class RemoteRepository {
 
     private String resolveBaseUrl() {
         if (resolvedBaseUrl != null) return resolvedBaseUrl;
+
+        // Prova prima l'indirizzo Tailscale (prioritario e obbligatorio)
         try {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(LOCAL_URL + "/api/health"))
+                    .uri(URI.create(TAILSCALE_URL + "/api/health"))
                     .timeout(Duration.ofSeconds(2))
                     .GET()
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {
-                System.out.println("Using local address");
-                resolvedBaseUrl = LOCAL_URL;
-                return LOCAL_URL;
+                System.out.println("Using Tailscale address");
+                resolvedBaseUrl = TAILSCALE_URL;
+                return TAILSCALE_URL;
             }
         } catch (Exception e) {
-            System.out.println("Local address unreachable, falling back to Tailscale");
+            System.out.println("Tailscale address unreachable, falling back to local address if available");
         }
+
+        // Fallback su indirizzo locale (se configurato)
+        if (LOCAL_URL != null && !LOCAL_URL.isBlank()) {
+            try {
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(LOCAL_URL + "/api/health"))
+                        .timeout(Duration.ofSeconds(2))
+                        .GET()
+                        .build();
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() == 200) {
+                    System.out.println("Using local address");
+                    resolvedBaseUrl = LOCAL_URL;
+                    return LOCAL_URL;
+                }
+            } catch (Exception e) {
+                System.out.println("Local address unreachable as well");
+            }
+        }
+
         resolvedBaseUrl = TAILSCALE_URL;
         return TAILSCALE_URL;
     }

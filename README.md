@@ -24,25 +24,38 @@ IdroLog è un'applicazione Java per monitorare il livello dei fiumi e le piogge.
 
 ## ⚙️ Configurazione
 
-Il progetto distingue chiaramente tra configurazione applicativa e configurazione di infrastruttura:
+Tutte le configurazioni del progetto sono centralizzate in un unico file: `config.properties`.
+Per iniziare, crea la tua configurazione copiando il file di esempio:
 
-* **`config.properties` (Applicazione / Runtime Java)**: contiene i parametri di dominio (ID della stazione, coordinate, endpoint del server). Viene letto dal codice Java sia dal client che dal server (anche dentro il container Docker).
-* **`.env` (Infrastruttura / Deploy locale)**: contiene esclusivamente i parametri SSH utilizzati dallo script Bash `deploy.sh` (`DEPLOY_USER`, `DEPLOY_HOST`, porta, cartella remota) per automatizzare il deployment. Rimane solo sulla tua macchina locale e non viene incluso nell'applicazione né nel container.
+```bash
+cp config.properties.example config.properties
+```
 
-### Configurazione Applicativa (`config.properties`)
-
-Crea il file nella root del progetto o all'interno di `idrolog-server/config.properties` con i seguenti parametri:
+Il file può essere posizionato nella radice del progetto o all'interno di `idrolog-server/config.properties` e contiene i seguenti parametri:
 
 ```properties
-# Indirizzi del server IdroLog
-server.local=http://<IP_LOCALE_SERVER>:7000
-server.tailscale=http://<IP_TAILSCALE_SERVER>:7000
+# --- Connessione Server (usato dal Client JavaFX) ---
+# server.tailscale: OBBLIGATORIO (provato per primo dal Client e usato come default da deploy.sh)
+server.tailscale=http://<IP_O_MAGICDNS_TAILSCALE>:7000
 
-# Parametri della stazione di monitoraggio
+# server.local: OPZIONALE (usato come fallback se Tailscale non è raggiungibile)
+server.local=http://<IP_LOCALE_SERVER>:7000
+
+# --- Parametri Stazione di Monitoraggio (usato dal Backend Server) ---
 station.id=XXXXX
 station.latitude=XX.X
 station.longitude=XX.X
+
+# --- Deployment Remoto SSH (usato da deploy.sh) ---
+deploy.user=myserver
+deploy.remote_dir=~/docker/idrolog
+# deploy.host=          # Opzionale: se omesso, viene estratto automaticamente da server.tailscale
+# deploy.port=22        # Opzionale: default 22
+# deploy.key=           # Opzionale: percorso della chiave privata SSH
 ```
+
+> [!NOTE]
+> Il Client desktop JavaFX prova sempre prima l'indirizzo **Tailscale** (`server.tailscale`). Se non risponde entro 2 secondi e `server.local` è configurato, esegue il fallback automatico sull'indirizzo locale.
 
 ### Come ottenere l'ID della stazione (`station.id`)
 Il sistema utilizza i dati pubblici della rete di monitoraggio della **Regione Emilia-Romagna**:
@@ -90,17 +103,12 @@ Il server è predisposto per il deployment su ambiente Docker. I file di configu
 
 È disponibile lo script `deploy.sh` che esegue automaticamente la compilazione del server, il trasferimento degli artefatti e delle configurazioni via SSH/SCP e il riavvio dei container sul server remoto.
 
-1. **Configurazione ambiente:**
-   Copia il file di esempio e configura i parametri di connessione del server remoto:
-   ```bash
-   cp .env.example .env
-   ```
-   Configura i valori (`DEPLOY_USER`, `DEPLOY_HOST`, `DEPLOY_REMOTE_DIR`, ecc.).
+I parametri di connessione (`deploy.user`, `deploy.remote_dir`, porta e chiave SSH) vengono letti direttamente da `config.properties`. L'host di destinazione viene ricavato automaticamente da `server.tailscale` (oppure sovrascritto impostando `deploy.host`).
 
-2. **Esecuzione del deploy:**
-   ```bash
-   ./deploy.sh
-   ```
+Per avviare il deploy:
+```bash
+./deploy.sh
+```
 
 ### Avvio manuale con Docker Compose
 
