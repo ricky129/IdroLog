@@ -23,7 +23,8 @@ public class ApiServer {
                 m.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
             }));
 
-            config.routes.get("/", ctx -> ctx.result("IdroLog server is running"));
+            config.routes.get("/", ctx -> ctx.redirect("/dashboard"));
+            config.routes.get("/dashboard", ctx -> ctx.html(DashboardView.HTML));
             config.routes.get("/api/health", ctx -> ctx.result("OK"));
             /*config.routes.get("/api/snapshots", ctx -> {
                 int hours = Integer.parseInt(

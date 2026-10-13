@@ -1,5 +1,7 @@
 package org.example.idrolog.server.db;
 
+import org.sqlite.SQLiteConfig;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -9,7 +11,10 @@ public class DatabaseManager {
     public static final String TABLE_PRECIPITATION = "precipitation";
 
     public DatabaseManager(String dbPath) throws SQLException {
-        connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
+        var config = new org.sqlite.SQLiteConfig();
+        config.setJournalMode(SQLiteConfig.JournalMode.WAL);
+        config.setTempStore(SQLiteConfig.TempStore.MEMORY);
+        connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath, config.toProperties());
         initSchema();
     }
 
