@@ -312,8 +312,6 @@ public class DashboardView {
                 <div class="chart-controls">
                     <label for="hoursSelect">Visualizza:</label>
                     <select id="hoursSelect" class="select-hours">
-                        <option value="1">1h</option>
-                        <option value="2">2h</option>
                         <option value="6">6h</option>
                         <option value="12">12h</option>
                         <option value="24" selected>24h</option>

@@ -92,8 +92,23 @@ public class DashboardController {
                 lastUpdateLabel.setText(last.getLocalTime());
 
                 XYChart.Series<String, Number> series = new XYChart.Series<>();
-                for (WeatherSnapshot s : riverData)
-                    series.getData().add(new XYChart.Data<>(s.getLocalTime(), s.value()));
+                for (WeatherSnapshot s : riverData) {
+                    java.time.ZonedDateTime dt = s.timestamp().atZone(java.time.ZoneId.of("Europe/Rome"));
+                    int min = dt.getMinute();
+                    String xLabel = "";
+                    if (hoursField == 48) {
+                        if (min == 0) {
+                            xLabel = s.getLocalTime();
+                        }
+                    } else if (hoursField == 24) {
+                        if (min == 0 || min == 30) {
+                            xLabel = s.getLocalTime();
+                        }
+                    } else {
+                        xLabel = s.getLocalTime();
+                    }
+                    series.getData().add(new XYChart.Data<>(xLabel, s.value()));
+                }
 
                 riverLevelChart.getData().setAll(series);
             }
