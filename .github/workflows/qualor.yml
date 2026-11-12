@@ -1,0 +1,24 @@
+name: qualor
+on:
+  pull_request:
+  push:
+    branches: [main]          # your default branch
+    tags: ['**']              # a tag push records a version
+permissions:
+  contents: read
+jobs:
+  qualor:
+    # Pull requests from forks get no secrets, so they are skipped.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      # Install dependencies (JS/TS, Go) or build (Java) here, before the scan.
+      - uses: qualor-dev/scan-action@v0.15
+        with:
+          server-url: ${{ vars.QUALOR_URL }}
+          token: ${{ secrets.QUALOR_TOKEN }}
