@@ -10,7 +10,7 @@ jobs:
   qualor:
     # Pull requests from forks get no secrets, so they are skipped.
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
         with:
