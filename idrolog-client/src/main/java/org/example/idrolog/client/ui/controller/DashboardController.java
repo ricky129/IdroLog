@@ -17,7 +17,6 @@ import java.util.List;
 public class DashboardController {
     @FXML private Label lastUpdateLabel;
     @FXML private Label currentLevelLabel;
-    @FXML private Label trendLabel;
     @FXML private Label statusLabel;
     @FXML private ComboBox<Integer> hoursComboBox;
     @FXML private LineChart<String, Number> riverLevelChart;
@@ -28,8 +27,6 @@ public class DashboardController {
     @FXML private Label precipitationStatusLabel;
     
     private final RemoteRepository remoteRepository = new RemoteRepository();
-
-    public DashboardController() {}
 
     private double currentUpperBound;
     private double currentTickUnit;
@@ -47,7 +44,7 @@ public class DashboardController {
         hoursComboBox.setValue(6);
         hoursComboBox.setConverter(new StringConverter<Integer>() {
             @Override public String toString(Integer h) { return h + "h"; }
-            @Override public Integer fromString(String s) { return Integer.parseInt(s.replace("h", "")); }
+            @Override public Integer fromString(String s) { return Integer.valueOf(s.replace("h", "")); }
         });
 
         hoursComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
@@ -96,16 +93,18 @@ public class DashboardController {
                     java.time.ZonedDateTime dt = s.timestamp().atZone(java.time.ZoneId.of("Europe/Rome"));
                     int min = dt.getMinute();
                     String xLabel = "";
-                    if (hoursField == 48) {
-                        if (min == 0) {
+                    switch (hoursField) {
+                        case 48:
+                            if (min == 0) {
+                                xLabel = s.getLocalTime();
+                            }   break;
+                        case 24:
+                            if (min == 0 || min == 30) {
+                                xLabel = s.getLocalTime();
+                            }   break;
+                        default:
                             xLabel = s.getLocalTime();
-                        }
-                    } else if (hoursField == 24) {
-                        if (min == 0 || min == 30) {
-                            xLabel = s.getLocalTime();
-                        }
-                    } else {
-                        xLabel = s.getLocalTime();
+                            break;
                     }
                     series.getData().add(new XYChart.Data<>(xLabel, s.value()));
                 }
@@ -125,7 +124,6 @@ public class DashboardController {
                 precipitationStatusLabel.setText("Nessun dato");
             }
         } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 }

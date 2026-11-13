@@ -1,3 +1,5 @@
+/* stylelint-disable declaration-property-value-no-unknown, function-no-unknown */
+
 .root {
     -fx-background-color: #f3f4f6; /* Grigio chiarissimo, quasi bianco */
     -fx-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
