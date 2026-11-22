@@ -38,17 +38,12 @@ public class DashboardController {
 
     private final RemoteRepository remoteRepository = new RemoteRepository();
 
-    private double currentUpperBound;
-    private double currentTickUnit;
-
     @FXML
     public void initialize() {
         levelAxis.setAutoRanging(false);
         levelAxis.setLowerBound(0.0);
-        currentUpperBound = 1.5;
-        levelAxis.setUpperBound(currentUpperBound);
-        currentTickUnit = 0.25;
-        levelAxis.setTickUnit(currentTickUnit);
+        levelAxis.setUpperBound(1.5);
+        levelAxis.setTickUnit(0.25);
         hoursComboBox.getItems().addAll(1, 2, 6, 12, 24, 48);
         hoursComboBox.setValue(6);
         hoursComboBox.setConverter(new StringConverter<Integer>() {
@@ -69,8 +64,7 @@ public class DashboardController {
         });
         refreshData(6);
         Timeline timeline = new Timeline(
-                new KeyFrame(Duration.minutes(5), e -> refreshData(hoursComboBox.getValue()))
-        );
+                new KeyFrame(Duration.minutes(5), e -> refreshData(hoursComboBox.getValue())));
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
     }
@@ -79,6 +73,14 @@ public class DashboardController {
         System.out.println("refreshData called with hours: " + hoursField);
         try {
             RiverResponse river = remoteRepository.fetchRiver(hoursField);
+            double max = river.snapshots().stream()
+                    .mapToDouble(WeatherSnapshot::value)
+                    .max().orElse(0);
+            double upper = 1.5;
+            while (upper < max)
+                upper *= 2;
+            levelAxis.setUpperBound(upper);
+            levelAxis.setTickUnit(upper / 6);
             if (!river.snapshots().isEmpty()) {
                 WeatherSnapshot last = river.snapshots().getLast();
                 currentLevelLabel.setText(String.format("%.2f m", last.value()));
@@ -99,8 +101,6 @@ public class DashboardController {
                     case NORMAL ->
                         "Stato: Normale";
                 };
-                currentLevelLabel.setStyle("-fx-text-fill: " + color + ";");
-                statusLabel.setText(status);
                 currentLevelLabel.setStyle("-fx-text-fill: " + color + ";");
                 statusLabel.setText(status);
                 lastUpdateLabel.setText(last.getLocalTime());
@@ -140,6 +140,8 @@ public class DashboardController {
                 precipitationStatusLabel.setText("Nessun dato");
             }
         } catch (Exception e) {
+            System.err.println("Errore aggiornamento dati: " + e.getMessage());
+            statusLabel.setText("Stato: Server non raggiungibile");
         }
     }
 }

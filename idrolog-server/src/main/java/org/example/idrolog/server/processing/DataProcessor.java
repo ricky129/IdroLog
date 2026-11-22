@@ -9,7 +9,7 @@ import org.example.idrolog.core.model.WeatherSnapshot;
  *
  * @author ricky
  */
-public class DataProcessor {
+public final class DataProcessor {
 
     private static final double ORANGE = 2.0;
     private static final double RED = 3.0;
