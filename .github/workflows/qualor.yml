@@ -2,7 +2,7 @@ name: qualor
 on:
   pull_request:
   push:
-    branches: [main]          # your default branch
+    branches: ['**']          # your default branch
     tags: ['**']              # a tag push records a version
 permissions:
   contents: read

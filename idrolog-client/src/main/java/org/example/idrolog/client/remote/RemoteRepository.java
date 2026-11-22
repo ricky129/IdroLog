@@ -1,11 +1,9 @@
 package org.example.idrolog.client.remote;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.example.idrolog.core.model.WeatherSnapshot;
-
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -15,8 +13,9 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.List;
 import java.util.Properties;
+import org.example.idrolog.core.model.RainResponse;
+import org.example.idrolog.core.model.RiverResponse;
 
 public class RemoteRepository {
 
@@ -53,7 +52,8 @@ public class RemoteRepository {
     private String resolvedBaseUrl = null;
 
     private String resolveBaseUrl() {
-        if (resolvedBaseUrl != null) return resolvedBaseUrl;
+        if (resolvedBaseUrl != null)
+            return resolvedBaseUrl;
 
         // Prova prima l'indirizzo Tailscale (prioritario e obbligatorio)
         try {
@@ -68,7 +68,7 @@ public class RemoteRepository {
                 resolvedBaseUrl = TAILSCALE_URL;
                 return TAILSCALE_URL;
             }
-        } catch (Exception e) {
+        } catch (IOException | InterruptedException e) {
             System.out.println("Tailscale address unreachable, falling back to local address if available");
         }
 
@@ -86,7 +86,7 @@ public class RemoteRepository {
                     resolvedBaseUrl = LOCAL_URL;
                     return LOCAL_URL;
                 }
-            } catch (Exception e) {
+            } catch (IOException | InterruptedException e) {
                 System.out.println("Local address unreachable as well");
             }
         }
@@ -95,18 +95,21 @@ public class RemoteRepository {
         return TAILSCALE_URL;
     }
 
-    public List<WeatherSnapshot> fetch(int hours, String table) throws Exception {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(resolveBaseUrl() + "/api/" + table + "?hours=" + hours))
-                .GET()
-                .build();
+    public RiverResponse fetchRiver(int hours) throws Exception {
+        return get("river_levels", hours, RiverResponse.class);
+    }
 
+    public RainResponse fetchRain(int hours) throws Exception {
+        return get("precipitation", hours, RainResponse.class);
+    }
+
+    private <T> T get(String path, int hours, Class<T> type) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(resolveBaseUrl() + "/api/" + path + "?hours=" + hours))
+                .GET().build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() != 200) {
-            System.err.println("HTTP Error: " + response.statusCode());
-            return List.of();
-        }
-        return mapper.readValue(response.body(), new TypeReference<>() {
-        });
+        if (response.statusCode() != 200)
+            throw new IOException("HTTP " + response.statusCode());
+        return mapper.readValue(response.body(), type);
     }
 }

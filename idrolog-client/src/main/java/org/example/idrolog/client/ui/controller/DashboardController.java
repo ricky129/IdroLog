@@ -11,27 +11,36 @@ import javafx.scene.control.Label;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 import org.example.idrolog.client.remote.RemoteRepository;
+import org.example.idrolog.core.model.RainResponse;
+import org.example.idrolog.core.model.RiverResponse;
 import org.example.idrolog.core.model.WeatherSnapshot;
-import java.util.List;
 
 public class DashboardController {
-    @FXML private Label lastUpdateLabel;
-    @FXML private Label currentLevelLabel;
-    @FXML private Label statusLabel;
-    @FXML private ComboBox<Integer> hoursComboBox;
-    @FXML private LineChart<String, Number> riverLevelChart;
+
+    @FXML
+    private Label lastUpdateLabel;
+    @FXML
+    private Label currentLevelLabel;
+    @FXML
+    private Label statusLabel;
+    @FXML
+    private ComboBox<Integer> hoursComboBox;
+    @FXML
+    private LineChart<String, Number> riverLevelChart;
     @FXML
     private NumberAxis levelAxis;
-    @FXML private Label precipitationTitleLabel;
-    @FXML private Label precipitationLabel;
-    @FXML private Label precipitationStatusLabel;
-    
+    @FXML
+    private Label precipitationTitleLabel;
+    @FXML
+    private Label precipitationLabel;
+    @FXML
+    private Label precipitationStatusLabel;
+
     private final RemoteRepository remoteRepository = new RemoteRepository();
 
     private double currentUpperBound;
     private double currentTickUnit;
-    private String color = "#247ba0";
-    private String status = "Stato: Normale";
+
     @FXML
     public void initialize() {
         levelAxis.setAutoRanging(false);
@@ -43,8 +52,15 @@ public class DashboardController {
         hoursComboBox.getItems().addAll(1, 2, 6, 12, 24, 48);
         hoursComboBox.setValue(6);
         hoursComboBox.setConverter(new StringConverter<Integer>() {
-            @Override public String toString(Integer h) { return h + "h"; }
-            @Override public Integer fromString(String s) { return Integer.valueOf(s.replace("h", "")); }
+            @Override
+            public String toString(Integer h) {
+                return h + "h";
+            }
+
+            @Override
+            public Integer fromString(String s) {
+                return Integer.valueOf(s.replace("h", ""));
+            }
         });
 
         hoursComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
@@ -62,49 +78,51 @@ public class DashboardController {
     private void refreshData(int hoursField) {
         System.out.println("refreshData called with hours: " + hoursField);
         try {
-            List<WeatherSnapshot> riverData = remoteRepository.fetch(hoursField, RemoteRepository.TABLE_RIVER);
-            if (!riverData.isEmpty()) {
-                WeatherSnapshot last = riverData.getLast();
+            RiverResponse river = remoteRepository.fetchRiver(hoursField);
+            if (!river.snapshots().isEmpty()) {
+                WeatherSnapshot last = river.snapshots().getLast();
                 currentLevelLabel.setText(String.format("%.2f m", last.value()));
 
-                if (last.value() > 1.5) {
-                    currentUpperBound*=2;
-                    levelAxis.setUpperBound(currentUpperBound);
-                    currentTickUnit*=2;
-                    levelAxis.setTickUnit(currentTickUnit);
-                }
-
-                if (last.value() >= 3.0)
-                    color = "#fb3640";
-                else if (last.value() >= 2.0)
-                    color = "#f5a623";
-
-                if (last.value() >= 3.0)
-                    status = "Stato: Allerta Rossa";
-                else if (last.value() >= 2.0)
-                    status = "Stato: Allerta Arancione";
-
+                String color = switch (river.alert()) {
+                    case RED ->
+                        "#fb3640";
+                    case ORANGE ->
+                        "#f5a623";
+                    case NORMAL ->
+                        "#247ba0";
+                };
+                String status = switch (river.alert()) {
+                    case RED ->
+                        "Stato: Allerta Rossa";
+                    case ORANGE ->
+                        "Stato: Allerta Arancione";
+                    case NORMAL ->
+                        "Stato: Normale";
+                };
+                currentLevelLabel.setStyle("-fx-text-fill: " + color + ";");
+                statusLabel.setText(status);
                 currentLevelLabel.setStyle("-fx-text-fill: " + color + ";");
                 statusLabel.setText(status);
                 lastUpdateLabel.setText(last.getLocalTime());
 
                 XYChart.Series<String, Number> series = new XYChart.Series<>();
-                for (WeatherSnapshot s : riverData) {
+                for (WeatherSnapshot s : river.snapshots()) {
                     java.time.ZonedDateTime dt = s.timestamp().atZone(java.time.ZoneId.of("Europe/Rome"));
                     int min = dt.getMinute();
                     String xLabel = "";
                     switch (hoursField) {
-                        case 48:
+                        case 48 -> {
                             if (min == 0) {
                                 xLabel = s.getLocalTime();
-                            }   break;
-                        case 24:
+                            }
+                        }
+                        case 24 -> {
                             if (min == 0 || min == 30) {
                                 xLabel = s.getLocalTime();
-                            }   break;
-                        default:
+                            }
+                        }
+                        default ->
                             xLabel = s.getLocalTime();
-                            break;
                     }
                     series.getData().add(new XYChart.Data<>(xLabel, s.value()));
                 }
@@ -112,12 +130,10 @@ public class DashboardController {
                 riverLevelChart.getData().setAll(series);
             }
 
-            List<WeatherSnapshot> rainData = remoteRepository.fetch(hoursField, RemoteRepository.TABLE_PRECIPITATION);
+            RainResponse rain = remoteRepository.fetchRain(hoursField);
             precipitationTitleLabel.setText("Precipitazioni " + hoursField + "h");
-
-            if (!rainData.isEmpty()) {
-                double totalRain = rainData.stream().mapToDouble(WeatherSnapshot::value).sum();
-                precipitationLabel.setText(String.format("%.1f mm", totalRain));
+            if (!rain.snapshots().isEmpty()) {
+                precipitationLabel.setText(String.format("%.1f mm", rain.total()));
                 precipitationStatusLabel.setText("Sensore attivo");
             } else {
                 precipitationLabel.setText("0.0 mm");

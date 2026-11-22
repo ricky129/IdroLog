@@ -4,8 +4,11 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.javalin.Javalin;
 import io.javalin.json.JavalinJackson;
+import org.example.idrolog.core.model.RainResponse;
+import org.example.idrolog.core.model.RiverResponse;
 import org.example.idrolog.server.db.DatabaseManager;
 import org.example.idrolog.server.db.SnapshotsRepository;
+import org.example.idrolog.server.processing.DataProcessor;
 
 public class ApiServer {
 
@@ -26,23 +29,19 @@ public class ApiServer {
             config.routes.get("/", ctx -> ctx.redirect("/dashboard"));
             config.routes.get("/dashboard", ctx -> ctx.html(DashboardView.HTML));
             config.routes.get("/api/health", ctx -> ctx.result("OK"));
-            /*config.routes.get("/api/snapshots", ctx -> {
-                int hours = Integer.parseInt(
-                        ctx.queryParamAsClass("hours", String.class).getOrDefault("24")
-                );
-                ctx.json(repository.getLastHours(hours));
-            });*/
             config.routes.get("/api/river_levels", ctx -> {
                 int hours = Integer.parseInt(
                         ctx.queryParamAsClass("hours", String.class).getOrDefault("24")
                 );
-                ctx.json(repository.getLastHours(hours, DatabaseManager.TABLE_RIVER));
+                var snapshots = repository.getLastHours(hours, DatabaseManager.TABLE_RIVER);
+                ctx.json(new RiverResponse(snapshots,
+                        DataProcessor.alertFor(snapshots),
+                        DataProcessor.trendOf(snapshots)));
             });
             config.routes.get("/api/precipitation", ctx -> {
-                int hours = Integer.parseInt(
-                        ctx.queryParamAsClass("hours", String.class).getOrDefault("24")
-                );
-                ctx.json(repository.getLastHours(hours, DatabaseManager.TABLE_PRECIPITATION));
+                int hours = Integer.parseInt(ctx.queryParamAsClass("hours", String.class).getOrDefault("24"));
+                var snapshots = repository.getLastHours(hours, DatabaseManager.TABLE_PRECIPITATION);
+                ctx.json(new RainResponse(snapshots, DataProcessor.totalRain(snapshots)));
             });
         }).start(port);
     }
